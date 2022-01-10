@@ -9,5 +9,6 @@ EditorBuildSettings:
     path: Assets/Scenes/Scene.unity
     guid: 9fc0d4010bbf28b4594072e72b8655ab
   m_configObjects:
+    Unity.XR.WindowsMR.Settings: {fileID: 11400000, guid: 39857458130f75e4fbfe89bdfe5f8e02, type: 2}
     com.unity.xr.management.loader_settings: {fileID: 11400000, guid: c83d7d33d55cdd24f9c0cc5575adbf65, type: 2}
     com.unity.xr.openxr.settings4: {fileID: 11400000, guid: 5a2dc32e9dd128f48a35a9ca5d6a549e, type: 2}

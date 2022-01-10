@@ -21,5 +21,6 @@ public class TextMovement : MonoBehaviour
 
         // face the user at all times
         transform.LookAt(cam.transform.position, transform.up);
+        transform.Rotate(0, 180, 0);
     }
 }

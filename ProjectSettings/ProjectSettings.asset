@@ -146,8 +146,10 @@ PlayerSettings:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
+  - {fileID: -2233130490659645953, guid: 39857458130f75e4fbfe89bdfe5f8e02, type: 2}
   - {fileID: 8128941431046633404, guid: 5a2dc32e9dd128f48a35a9ca5d6a549e, type: 2}
   - {fileID: 3558393398686955278, guid: c83d7d33d55cdd24f9c0cc5575adbf65, type: 2}
+  - {fileID: 0}
   metroInputSource: 0
   wsaTransparentSwapchain: 0
   m_HolographicPauseOnTrackingLoss: 1
@@ -601,7 +603,8 @@ PlayerSettings:
   webGLLinkerTarget: 1
   webGLThreadsSupport: 0
   webGLDecompressionFallback: 0
-  scriptingDefineSymbols: {}
+  scriptingDefineSymbols:
+    14: 
   additionalCompilerArguments: {}
   platformArchitecture: {}
   scriptingBackend: {}
@@ -623,11 +626,11 @@ PlayerSettings:
   m_MobileRenderingPath: 1
   metroPackageName: Template3D
   metroPackageVersion: 1.0.0.0
-  metroCertificatePath: C:\Users\nateg\Downloads\Unity\HololensCamera\Assets\WSATestCertificate.pfx
+  metroCertificatePath: Assets\WSATestCertificate.pfx
   metroCertificatePassword: 
   metroCertificateSubject: DefaultCompany
   metroCertificateIssuer: DefaultCompany
-  metroCertificateNotAfter: 80715841350ad901
+  metroCertificateNotAfter: 00ec9ce5d21fd901
   metroApplicationDescription: Template_3D
   wsaImages: {}
   metroTileShortName: HololensCamera
