@@ -156,7 +156,8 @@ public class ProcessAudioInput : MonoBehaviour
                 var output = _sttClient.SpeechToText(voiceResult, Convert.ToUInt32(voiceResult.Length));
                 await Task.Delay(10);
                 transcription.SetText(output);
-                Debug.Log("Result: " + transcription.text);
+                Debug.Log(voiceResult);
+                Debug.Log("Result: " + transcription.text + ".");
             }
         }
 
