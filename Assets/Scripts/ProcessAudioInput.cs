@@ -12,9 +12,9 @@ using TMPro;
 
 public class ProcessAudioInput : MonoBehaviour
 {
-    public KeyCode PushToTalkKey = KeyCode.Tab;
+    public KeyCode PushToTalkKey = KeyCode.Tab; // Not currently used
 
-    [Header("DeepSpeech model")] public string modelPath;
+    public string modelPath;
     public string externalScorerPath;
     public TextMeshPro transcription;
     #region Calculation Variables
@@ -29,7 +29,8 @@ public class ProcessAudioInput : MonoBehaviour
 
     #endregion
 
-    protected bool _detectPhrases;
+    // TODO: Write tooltips
+    protected bool _detectPhrases; // Not currently used
     protected bool _microphoneActive = true;
     protected bool _canRecord = false;
     protected bool _isSetup = false;
@@ -50,7 +51,7 @@ public class ProcessAudioInput : MonoBehaviour
 
 
     private bool didTransmit;
-    private ConcurrentQueue<short[]> _threadedBufferQueue = new ConcurrentQueue<short[]>();
+    private ConcurrentQueue<short[]> _threadedBufferQueue = new ConcurrentQueue<short[]>(); // Threadsafe queue
     private int _threadSafeBoolBackValue = 0;
 
     private IDeepSpeech _sttClient;
@@ -60,9 +61,11 @@ public class ProcessAudioInput : MonoBehaviour
     /// </summary>
     private DeepSpeechStream _sttStream;
 
-    public bool StreamingIsBusy {
+    public bool StreamingIsBusy
+    {
         get => (Interlocked.CompareExchange(ref _threadSafeBoolBackValue, 1, 1) == 1);
-        set {
+        set
+        {
             if (value) Interlocked.CompareExchange(ref _threadSafeBoolBackValue, 1, 0);
             else Interlocked.CompareExchange(ref _threadSafeBoolBackValue, 0, 1);
         }
@@ -70,28 +73,38 @@ public class ProcessAudioInput : MonoBehaviour
 
     #region Unity Methods
 
-    private void Start() {
+    private void Start()
+    {
         _canRecord = true;
 
-        if (_canRecord) {
+        if (_canRecord)
+        {
             SetupService(_detectPhrases, _autoDetectVoice);
         }
+        // Debug statements
+        Debug.Log("Using Microphone" + Microphone.devices[0]);
+        Debug.Log("Finished starting up");
     }
 
-    private void Update() {
+    private void Update()
+    {
         if (_canRecord && _isSetup == false)
             SetupService(_detectPhrases, _autoDetectVoice);
 
-        if (_autoDetectVoice == true && _microphoneActive == true) {
+        if (_autoDetectVoice == true && _microphoneActive == true)
+        {
             DetectAudio();
         }
     }
 
-    private void OnApplicationPause(bool pause) {
-        if (pause == true) {
+    private void OnApplicationPause(bool pause)
+    {
+        if (pause == true)
+        {
             StopMicrophoneCapture(false);
-        } else if (_autoDetectVoice == true) // Returning from pause and auto detect is on
-          {
+        }
+        else if (_autoDetectVoice == true) // Returning from pause and auto detect is on
+        {
             StartMicrophoneCapture();
         }
     }
@@ -100,7 +113,8 @@ public class ProcessAudioInput : MonoBehaviour
 
     #region Virtual Methods
 
-    public void SetupService(bool detectPhrases, bool autoDetectVoice) {
+    public void SetupService(bool detectPhrases, bool autoDetectVoice)
+    {
         _sttClient = new DeepSpeech(modelPath);
         _sttClient.EnableExternalScorer(externalScorerPath);
         //If you want to add bias to a word. Only supports single words.
@@ -111,7 +125,8 @@ public class ProcessAudioInput : MonoBehaviour
 
         _detectPhrases = detectPhrases;
         _autoDetectVoice = autoDetectVoice;
-        if (_canRecord && autoDetectVoice) {
+        if (_canRecord && autoDetectVoice)
+        {
             _isSetup = true;
             ToggleActivelyRecording(true);
         }
@@ -121,7 +136,8 @@ public class ProcessAudioInput : MonoBehaviour
 
     #region Google Methods
 
-    private void SendToDeepSpeech() {
+    private void SendToDeepSpeech()
+    {
         if (_autoDetectVoice == false) // _samples has already been populated in DetectAudio if auto detection is used
         {
             FillSamples(0);
@@ -132,30 +148,36 @@ public class ProcessAudioInput : MonoBehaviour
         short[] shorts = new short[_samples.Length];
 
         float rescaleFactor = 32767; // to put float values in range of [-32767, 32767] for correct conversion
-        for (int i = 0; i < _samples.Length; i++) {
+        for (int i = 0; i < _samples.Length; i++)
+        {
             shortSample = (short)(_samples[i] * rescaleFactor); // convert to short
             shorts[i] = shortSample;
         }
 
-        if (didTransmit == false) {
+        if (didTransmit == false)
+        {
             _sttStream = _sttClient.CreateStream();
             didTransmit = true;
         }
 
         _threadedBufferQueue.Enqueue(shorts);
-        if (StreamingIsBusy == false) {
+        if (StreamingIsBusy == false)
+        {
             Task.Run(ThreadedWork).ConfigureAwait(false);
         }
     }
 
-    private async void ThreadedWork() {
+    private async void ThreadedWork()
+    {
         StreamingIsBusy = true;
         Debug.Log(_threadedBufferQueue.Count);
-        while (_threadedBufferQueue.Count > 0) {
-            if (_threadedBufferQueue.TryDequeue(out short[] voiceResult)) {
+        while (_threadedBufferQueue.Count > 0)
+        {
+            if (_threadedBufferQueue.TryDequeue(out short[] voiceResult))
+            {
                 var output = _sttClient.SpeechToText(voiceResult, Convert.ToUInt32(voiceResult.Length));
                 await Task.Delay(10);
-                transcription.SetText(output);
+                transcription.SetText(output); // Update displayed transcription text
                 Debug.Log(voiceResult);
                 Debug.Log("Result: " + transcription.text + ".");
             }
@@ -168,20 +190,27 @@ public class ProcessAudioInput : MonoBehaviour
 
     #region Microphone / Voice Input Helpers
 
-    public void ToggleActivelyRecording(bool enable) {
+    public void ToggleActivelyRecording(bool enable)
+    {
         if (_canRecord == false)
             return;
 
-        if (enable) {
+        if (enable)
+        {
             StartMicrophoneCapture();
-        } else {
+        }
+        else
+        {
             StopMicrophoneCapture();
         }
     }
 
-    private void StartMicrophoneCapture() {
-        if (_canRecord && _currentlyRecording == false) {
-            if (didTransmit == false) {
+    private void StartMicrophoneCapture()
+    {
+        if (_canRecord && _currentlyRecording == false)
+        {
+            if (didTransmit == false)
+            {
                 _sttStream = _sttClient.CreateStream();
                 didTransmit = true;
             }
@@ -193,35 +222,40 @@ public class ProcessAudioInput : MonoBehaviour
         }
     }
 
-    private void StopMicrophoneCapture(bool sendLastRequest = true) {
+    private void StopMicrophoneCapture(bool sendLastRequest = true)
+    {
         Microphone.End(Microphone.devices[0]);
-        if (didTransmit && StreamingIsBusy == false) {
+        if (didTransmit && StreamingIsBusy == false)
+        {
             didTransmit = false;
             _sttClient.FreeStream(_sttStream);
         }
 
         _currentlyRecording = false;
-        if (sendLastRequest == true) {
+        if (sendLastRequest == true)
+        {
             SendToDeepSpeech();
         }
     }
 
     /* Used to determine when t he user has started and stopped speaking */
-    private void DetectAudio() {
+    private void DetectAudio()
+    {
         FillSamples(_micPrevPos);
 
         // Determine if the microphone noise levels have been loud enough
         float maxVolume = 0.0f;
-        for (int i = _micPrevPos + 1; i < Microphone.GetPosition(Microphone.devices[0]); ++i) {
+        for (int i = _micPrevPos + 1; i < Microphone.GetPosition(Microphone.devices[0]); ++i)
+        {
             if (i >= _samples.Length)
-                Debug.LogError("WAS " + i + "in length: " + _samples.Length);
-            if (_samples[i] > maxVolume) {
+                Debug.LogError("WAS" + i + "in length:" + _samples.Length);
+            if(_samples[i] > maxVolume) {
                 maxVolume = _samples[i];
             }
         }
 
-
-        if (maxVolume > _minimumSpeakingSampleValue) {
+        if (maxVolume > _minimumSpeakingSampleValue)
+        {
             if (_audioDetected == false) // User first starts talking after a gap
             {
                 if (_requestNeedsSending == false)
@@ -231,23 +265,27 @@ public class ProcessAudioInput : MonoBehaviour
                 _requestNeedsSending = true;
 
             }
-        } else // max volume below threshold
-          {
+        }
+        else // max volume below threshold
+        {
             if (_audioDetected == true) // User first stopped talking after talking
             {
                 _timeAtSilenceBegan = Time.time;
                 _audioDetected = false;
-            } else if (_requestNeedsSending == true) // while no new voice input is detected
-              {
+            }
+            else if (_requestNeedsSending == true) // while no new voice input is detected
+            {
 
-                if (Time.time - _timeAtSilenceBegan > _silenceTimer) {
+                if (Time.time - _timeAtSilenceBegan > _silenceTimer)
+                {
                     Debug.Log("Sending audio to recognizer...");
 
                     _audioDetected = false;
                     _requestNeedsSending = false;
                     SendToDeepSpeech();
                     ClearSamples();
-                    if (didTransmit && StreamingIsBusy == false) {
+                    if (didTransmit && StreamingIsBusy == false)
+                    {
                         didTransmit = false;
                         _sttClient.FreeStream(_sttStream);
                     }
@@ -259,13 +297,16 @@ public class ProcessAudioInput : MonoBehaviour
     }
 
 
-    void FillSamples(int micPosition) {
+    void FillSamples(int micPosition)
+    {
         _samples = new float[_audioRecording.samples]; // make a float array to hold the samples
         _audioRecording.GetData(_samples, micPosition); // Fill that array (values [-1.0f -> 1.0]
     }
 
-    void ClearSamples() {
-        for (int i = 0; i < _samples.Length; ++i) {
+    void ClearSamples()
+    {
+        for (int i = 0; i < _samples.Length; ++i)
+        {
             _samples[i] = 0.0f;
         }
 
