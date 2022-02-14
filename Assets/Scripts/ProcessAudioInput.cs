@@ -209,6 +209,7 @@ public class ProcessAudioInput : MonoBehaviour
     {
         if (_canRecord && _currentlyRecording == false)
         {
+            Debug.Log("Starting Microphone Capture");
             if (didTransmit == false)
             {
                 _sttStream = _sttClient.CreateStream();
@@ -224,6 +225,7 @@ public class ProcessAudioInput : MonoBehaviour
 
     private void StopMicrophoneCapture(bool sendLastRequest = true)
     {
+        Debug.Log("Ending Microphone Capture");
         Microphone.End(Microphone.devices[0]);
         if (didTransmit && StreamingIsBusy == false)
         {
