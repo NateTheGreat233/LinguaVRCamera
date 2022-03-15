@@ -2,15 +2,19 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using UnityEngine;
+using TMPro;
 
 public class FaceMovement : MonoBehaviour
 {
     public FacialDetection facialDetection;
 
+    public TextMeshPro transcription;
+
     private void Update()
     {
         if (!facialDetection.getHasFaces())
         {
+            transcription.text = "No faces detected";
             return;
         }
         Rectangle[] faces = facialDetection.getFaces();
@@ -18,8 +22,11 @@ public class FaceMovement : MonoBehaviour
         Matrix4x4 projectionMatrix = facialDetection.getProjectionMatrix();
         if (faces.Length == 0)
         {
+            transcription.text = "Face length = 0";
             return;
         }
+
+        transcription.text = "wow it worked";
 
         float x = faces[0].X;
         float y = faces[0].Y;
