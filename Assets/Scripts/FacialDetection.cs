@@ -10,7 +10,7 @@ using TMPro;
 using Emgu.CV.Structure;
 using System;
 using System.IO;
-using System.Drawing.Imaging;
+// using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 using UnityEngine.UI;
 
@@ -43,18 +43,6 @@ public class FacialDetection : MonoBehaviour
         {
             testbytes[i] = 150;
         }
-        
-
-        
-        Mat face = CvInvoke.Imread("Assets/Images/face.jpg", ImreadModes.AnyColor);
-        byte[] facebytes = face.GetData();
-        Bitmap testBitmap = copyDataToBitmap(facebytes, face.Width, face.Height);
-        Image<Rgb, byte> image = new Image<Rgb, byte>(testBitmap);
-        CvInvoke.CvtColor(image, image, ColorConversion.Bgr2Gray);
-        Rectangle[] rectangles = cascade.DetectMultiScale(image);
-        Debug.Log(rectangles.Length);
-        debugText.text = "Faces: " + rectangles.Length;
-        
 
 
         /*
@@ -67,28 +55,6 @@ public class FacialDetection : MonoBehaviour
         */
     }
 
-    private Bitmap copyDataToBitmap(byte[] data, int width, int height)
-    {
-        //Here create the Bitmap to the know height, width and format
-        Bitmap bmp = new Bitmap(width, height, PixelFormat.Format24bppRgb);
-        
-
-        //Create a BitmapData and Lock all pixels to be written 
-        BitmapData bmpData = bmp.LockBits(
-                             new Rectangle(0, 0, bmp.Width, bmp.Height),
-                             ImageLockMode.WriteOnly, bmp.PixelFormat);
-
-        //Copy the data from the byte array into BitmapData.Scan0
-        Marshal.Copy(data, 0, bmpData.Scan0, data.Length);
-
-
-        //Unlock the pixels
-        bmp.UnlockBits(bmpData);
-
-
-        //Return the bitmap 
-        return bmp;
-    }
 
     public void sendFrame(byte[] bytes, Matrix4x4 camM, Matrix4x4 pM, int resWidth, int resHeight)
     {
