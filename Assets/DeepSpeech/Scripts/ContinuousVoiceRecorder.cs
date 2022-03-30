@@ -86,7 +86,7 @@ public class ContinuousVoiceRecorder : MonoBehaviour
 
         _frequency = _sttClient.GetModelSampleRate();
         _sampleSize = _frequency / 2;
-
+        Debug.Log("Initialized deep speech model, beginning recording");
         StartRecording();
     }
     private void FixedUpdate()

@@ -244,7 +244,7 @@ MonoBehaviour:
   ResultText: 
   transcription: {fileID: 1097636927}
   _silenceTimer: 1
-  _minimumSpeakingSampleValue: 0.5
+  _minimumSpeakingSampleValue: 0.206
 --- !u!114 &1097636927
 MonoBehaviour:
   m_ObjectHideFlags: 0
