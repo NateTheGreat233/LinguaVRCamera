@@ -5,10 +5,13 @@
 
 using UnityEngine;
 using UnityEngine.XR.WSA;
+using UnityEngine.XR.WindowsMR;
 
 using System;
+using System.Runtime.InteropServices;
 
 using HoloLensCameraStream;
+using TMPro;
 
 /// <summary>
 /// This example gets the video frames at 30 fps and displays them on a Unity texture,
@@ -23,6 +26,10 @@ public class VideoPanelApp : MonoBehaviour
     VideoPanel _videoPanelUI;
     VideoCapture _videoCapture;
     public FacialDetection facialDetection;
+    public TextMeshPro debugText;
+    public TextMeshPro debugText2;
+    public TextMeshPro debugText3;
+    private bool ready;
 
     IntPtr _spatialCoordinateSystemPtr;
 
@@ -30,13 +37,27 @@ public class VideoPanelApp : MonoBehaviour
     {
         //Fetch a pointer to Unity's spatial coordinate system if you need pixel mapping
         //_spatialCoordinateSystemPtr = WorldManager.GetNativeISpatialCoordinateSystemPtr();
+        _spatialCoordinateSystemPtr = WindowsMREnvironment.OriginSpatialCoordinateSystem; // Windows::Perception::Spatial::ISpatialCoordinateSystem
 
         //Call this in Start() to ensure that the CameraStreamHelper is already "Awake".
         CameraStreamHelper.Instance.GetVideoCaptureAsync(OnVideoCaptureCreated);
         //You could also do this "shortcut":
         //CameraStreamManager.Instance.GetVideoCaptureAsync(v => videoCapture = v);
 
-        _videoPanelUI = GameObject.FindObjectOfType<VideoPanel>();
+        _videoPanelUI = FindObjectOfType<VideoPanel>();
+    }
+
+    private void Awake()
+    {
+        ready = false;
+    }
+
+    private void Update()
+    {
+        if(ready)
+        {
+            _videoCapture.RequestNextFrameSample(OnFrameSampleAcquired);
+        }
     }
 
     private void OnDestroy()
@@ -71,7 +92,7 @@ public class VideoPanelApp : MonoBehaviour
         cameraParams.cameraResolutionHeight = _resolution.height;
         cameraParams.cameraResolutionWidth = _resolution.width;
         cameraParams.frameRate = Mathf.RoundToInt(frameRate);
-        cameraParams.pixelFormat = CapturePixelFormat.BGRA32;
+        cameraParams.pixelFormat = CapturePixelFormat.BGRA32; // changed from BGRA32
         cameraParams.rotateImage180Degrees = true; //If your image is upside down, remove this line.
         cameraParams.enableHolograms = false;
 
@@ -89,6 +110,7 @@ public class VideoPanelApp : MonoBehaviour
         }
 
         Debug.Log("Video capture started.");
+        ready = true;
     }
 
     void OnFrameSampleAcquired(VideoCaptureSample sample)
@@ -121,8 +143,8 @@ public class VideoPanelApp : MonoBehaviour
         {
             Matrix4x4 camToWorldMatrix = LocatableCameraUtils.ConvertFloatArrayToMatrix4x4(cameraToWorldMatrix);
             Matrix4x4 projMatrix = LocatableCameraUtils.ConvertFloatArrayToMatrix4x4(projectionMatrix);
-            facialDetection.sendFrame(_latestImageBytes, camToWorldMatrix, projMatrix);
-            //_videoPanelUI.SetBytes(_latestImageBytes);
+            facialDetection.sendFrame(_latestImageBytes, camToWorldMatrix, projMatrix, _resolution.width, _resolution.height);
+            _videoPanelUI.SetBytes(_latestImageBytes);
         }, false);
     }
 }
